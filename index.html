@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexTech Industries | Documentación de Ingeniería</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Fira+Code:wght@500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-body: #f8f9fa;
+            --primary: #0d1b2a; /* Azul noche profundo */
+            --accent: #2979ff; /* Azul eléctrico ingeniería */
+            --accent-light: #e3f2fd;
+            --text-main: #212529;
+            --text-muted: #6c757d;
+            --glass: rgba(255, 255, 255, 0.85);
+            --border: #dee2e6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+
+        /* CANVAS 3D - FONDO INTERACTIVO */
+        #canvas-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            opacity: 0.5; /* Sutil para no distraer la lectura */
+            pointer-events: none;
+        }
+
+        /* NAVEGACIÓN SUPERIOR */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .nav-links a:hover { color: var(--accent); }
+        .nav-links a::after {
+            content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px;
+            background: var(--accent); transition: 0.3s;
+        }
+        .nav-links a:hover::after { width: 100%; }
+
+        /* ESTRUCTURA PRINCIPAL */
+        .container {
+            max-width: 1000px;
+            margin: 120px auto 60px auto;
+            padding: 0 25px;
+        }
+
+        /* HEADER / HERO */
+        .hero {
+            text-align: center;
+            margin-bottom: 100px;
+            animation: fadeUp 1s ease;
+        }
+
+        .badge {
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            line-height: 1.1;
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-weight: 800;
+        }
+
+        .hero-text {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 750px;
+            margin: 0 auto 40px auto;
+        }
+
+        /* PROYECTO PRINCIPAL (Highlight) */
+        .main-project-card {
+            background: linear-gradient(135deg, #0d1b2a 0%, #1b4332 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .main-project-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+            opacity: 0.1;
+        }
+
+        .btn-launch {
+            background: var(--accent);
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            padding: 16px 40px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            margin-top: 25px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+            z-index: 2;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-launch:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px var(--accent);
+            background: white;
+            color: var(--accent);
+        }
+
+        /* ACORDEONES DE CONTENIDO */
+        .accordion-item {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+            overflow: hidden;
+            transition: 0.3s;
+        }
+        
+        .accordion-header {
+            padding: 30px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            transition: background 0.2s;
+        }
+        .accordion-header:hover { background: #f8f9fa; }
+        
+        .acc-title h2 { font-size: 1.5rem; color: var(--primary); margin-bottom: 5px; }
+        .acc-subtitle { font-size: 0.9rem; color: var(--accent); text-transform: uppercase; font-weight: 700; }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #fff;
+        }
+        .accordion-content.active { max-height: 3000px; /* Altura suficiente */ border-top: 1px solid var(--border); }
+        
+        .content-padding { padding: 40px; }
+
+        /* ESTILOS EDUCATIVOS */
+        h3 { font-family: 'Lora', serif; font-size: 1.4rem; color: var(--primary); margin: 40px 0 20px 0; border-left: 4px solid var(--accent); padding-left: 15px; }
+        p { margin-bottom: 20px; font-size: 1.05rem; text-align: justify; }
+        
+        /* CAJAS DE FÓRMULAS LATEX */
+        .formula-box {
+            background: #f1f3f5;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 25px 0;
+            text-align: center;
+            font-family: 'Times New Roman', serif;
+            border: 1px solid #e9ecef;
+        }
+        .math { font-size: 1.5rem; font-style: italic; margin-bottom: 15px; color: #000; }
+        .math-desc { font-family: 'Inter', sans-serif; font-size: 0.9rem; color: #666; display: block; }
+
+        /* DIAGRAMAS SVG (GENERADOS EN CSS) */
+        .diagram-container {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: white;
+            border: 1px dashed var(--border);
+            border-radius: 10px;
+        }
+
+        /* EQUIPO */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+        }
+        .team-card {
+            background: #fff;
+            padding: 30px 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+        .team-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .role-badge { 
+            background: var(--primary); color: white; 
+            padding: 4px 10px; border-radius: 4px; 
+            font-size: 0.75rem; text-transform: uppercase; 
+            margin-top: 10px; display: inline-block; 
+        }
+
+        /* ANIMACIONES */
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        .rotate-icon { transform: rotate(180deg); transition: 0.3s; }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            nav { flex-direction: column; gap: 15px; padding: 20px; }
+            .accordion-header { flex-direction: column; text-align: center; gap: 10px; }
+            .diagram-container svg { width: 100%; height: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="canvas-container"></div>
+
+    <nav>
+        <div class="logo-area">
+            <i class="fas fa-cube fa-lg"></i>
+            NEXTECH INDUSTRIES
+        </div>
+        <div class="nav-links">
+            <a href="javascript:void(0)" onclick="goToSection('section-empaque')">Empaque</a>
+            <a href="javascript:void(0)" onclick="goToSection('section-robotica')">Robótica</a>
+            <a href="javascript:void(0)" onclick="goToSection('section-equipo')">Equipo</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <section class="hero">
+            <span class="badge">León, Guanajuato • 2025</span>
+            <h1>Ingeniería de Simulación <br> Dinámica Aplicada</h1>
+            <p class="hero-text">
+                Plataforma educativa y profesional para la validación de sistemas físicos industriales. 
+                Optimizamos la realidad a través de modelos matemáticos de alta fidelidad.
+            </p>
+            
+            <div class="main-project-card">
+                <h2 style="font-size: 2rem; margin-bottom: 10px;">Simulador Maestro v2.0</h2>
+                <p style="color: #ccc; max-width: 600px;">Accede a nuestra interfaz interactiva principal. Incluye visualización en tiempo real de colisiones y cinemática inversa.</p>
+                <a href="https://emma35015-lgtm.github.io/NexTech-Industries/" target="_blank" class="btn-launch">
+                    <i class="fas fa-play-circle"></i> EJECUTAR SIMULACIÓN
+                </a>
+            </div>
+        </section>
+
+        <div class="accordion-item" id="section-empaque">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="acc-title">
+                    <div class="acc-subtitle">Caso de Estudio 01</div>
+                    <h2>Optimización de Línea de Empaque</h2>
+                </div>
+                <i class="fas fa-chevron-down fa-lg transition-icon"></i>
+            </div>
+            
+            <div class="accordion-content open"> <div class="content-padding">
+                    <p><strong>El Problema:</strong> En "PackTech Solutions", la alta velocidad de las bandas transportadoras provoca colisiones descontroladas. Esto no solo daña el producto, sino que disipa energía de manera ineficiente.</p>
+                    
+                    <h3>1. Fundamento Físico: El Choque</h3>
+                    <p>Para resolver esto, modelamos el sistema como una interacción de cuerpos rígidos. El concepto clave es el <strong>Momento Lineal (Cantidad de Movimiento)</strong>. En ingeniería, sabemos que la fuerza es el cambio del momento en el tiempo. Si controlamos el cambio de momento, controlamos el daño.</p>
+
+                    <div class="diagram-container">
+                        <svg width="400" height="150" viewBox="0 0 400 150">
+                            <circle cx="80" cy="75" r="30" fill="#e3f2fd" stroke="#2979ff" stroke-width="3"/>
+                            <text x="80" y="80" text-anchor="middle" fill="#2979ff" font-family="sans-serif" font-weight="bold">m₁</text>
+                            <line x1="120" y1="75" x2="160" y2="75" stroke="#2979ff" stroke-width="3" marker-end="url(#arrowhead)"/>
+                            
+                            <circle cx="320" cy="75" r="40" fill="#ffebee" stroke="#d32f2f" stroke-width="3"/>
+                            <text x="320" y="80" text-anchor="middle" fill="#d32f2f" font-family="sans-serif" font-weight="bold">m₂</text>
+                            <line x1="270" y1="75" x2="230" y2="75" stroke="#d32f2f" stroke-width="3" marker-end="url(#arrowhead-red)"/>
+                            
+                            <path d="M190 60 L200 90 L210 60" fill="none" stroke="#333" stroke-width="2"/>
+                            <text x="200" y="110" text-anchor="middle" font-size="12" fill="#666">Zona de Impacto</text>
+
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#2979ff" />
+                                </marker>
+                                <marker id="arrowhead-red" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#d32f2f" />
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <h3>2. Ecuaciones Maestras</h3>
+                    <p>Utilizamos dos leyes fundamentales para calcular las velocidades finales ($v_f$) basándonos en las iniciales ($v_i$).</p>
+
+                    <div class="formula-box">
+                        <div class="math">m_1v_{1i} + m_2v_{2i} = m_1v_{1f} + m_2v_{2f}</div>
+                        <span class="math-desc"><strong>Conservación de Momento:</strong> La "cantidad de movimiento" total del sistema permanece constante si no hay fuerzas externas (como fricción excesiva).</span>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="math">e = - \frac{v_{2f} - v_{1f}}{v_{2i} - v_{1i}}</div>
+                        <span class="math-desc"><strong>Coeficiente de Restitución (e):</strong> Determina la elasticidad. <br>Si $e=1$, rebotan perfecto (acero). Si $e=0$, se pegan (arcilla).</span>
+                    </div>
+
+                    <h3>3. Solución Aplicada</h3>
+                    <p>Al despejar estas ecuaciones, obtenemos la fórmula predictiva que usa nuestro software para evitar daños:</p>
+                    <div class="formula-box" style="border-left: 5px solid var(--accent);">
+                        <div class="math">v_{1f} = \frac{(m_1 - e m_2)v_{1i} + (1+e)m_2v_{2i}}{m_1 + m_2}</div>
+                        <span class="math-desc">Esta ecuación permite a PackTech ajustar la velocidad de banda ($v_{1i}$) para asegurar que $v_{1f}$ sea segura.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item" id="section-robotica">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="acc-title">
+                    <div class="acc-subtitle">Caso de Estudio 02</div>
+                    <h2>Análisis Cinético de Maquinaria</h2>
+                </div>
+                <i class="fas fa-chevron-down fa-lg transition-icon"></i>
+            </div>
+            
+            <div class="accordion-content">
+                <div class="content-padding">
+                    <p><strong>El Problema:</strong> "RoboIndustrial" necesita reducir el tiempo de ciclo. Sin embargo, aumentar la velocidad de los motores sin cálculo previo genera <strong>Singularidades</strong> y vibraciones excesivas.</p>
+                    
+                    <h3>1. Fundamento: Cinemática Rotacional</h3>
+                    <p>A diferencia del movimiento lineal, aquí lidiamos con ángulos ($\theta$). La clave es entender cómo la velocidad de giro del motor ($\omega$) se traduce en la velocidad lineal ($v$) de la herramienta en la punta del brazo.</p>
+
+                    <div class="diagram-container">
+                        <svg width="400" height="200" viewBox="0 0 400 200">
+                            <rect x="50" y="150" width="60" height="30" fill="#333"/>
+                            
+                            <line x1="80" y1="150" x2="180" y2="80" stroke="#555" stroke-width="12" stroke-linecap="round"/>
+                            <circle cx="80" cy="150" r="8" fill="#fff" stroke="#000" stroke-width="2"/>
+                            <text x="100" y="140" font-size="14">θ₁</text>
+
+                            <line x1="180" y1="80" x2="320" y2="100" stroke="#555" stroke-width="10" stroke-linecap="round"/>
+                            <circle cx="180" cy="80" r="6" fill="#fff" stroke="#000" stroke-width="2"/>
+                            <text x="200" y="70" font-size="14">θ₂</text>
+
+                            <circle cx="320" cy="100" r="10" fill="#2979ff"/>
+                            <text x="340" y="105" font-size="14" font-weight="bold" fill="#2979ff">v</text>
+
+                            <line x1="320" y1="100" x2="320" y2="60" stroke="#2979ff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                        </svg>
+                    </div>
+
+                    <h3>2. Ecuaciones Maestras</h3>
+                    
+                    <div class="formula-box">
+                        <div class="math">\omega = \frac{d\theta}{dt}</div>
+                        <span class="math-desc"><strong>Velocidad Angular:</strong> Qué tan rápido gira el motor (radianes por segundo).</span>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="math">v = \omega \times r</div>
+                        <span class="math-desc"><strong>Relación Tangencial:</strong> La velocidad de la punta ($v$) depende del largo del brazo ($r$) y del giro ($\omega$). Un brazo más largo se mueve más rápido en la punta con el mismo motor.</span>
+                    </div>
+
+                    <div class="formula-box">
+                        <div class="math">\tau = I \cdot \alpha</div>
+                        <span class="math-desc"><strong>Torque (Ley de Newton Rotacional):</strong> Para acelerar el brazo ($\alpha$), necesitamos un Torque ($\tau$) proporcional al Momento de Inercia ($I$). Esto define qué motor comprar.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item" id="section-equipo">
+            <div class="accordion-header" onclick="toggleAccordion(this)">
+                <div class="acc-title">
+                    <div class="acc-subtitle">NexTech Team</div>
+                    <h2>Desarrolladores del Proyecto</h2>
+                </div>
+                <i class="fas fa-chevron-down fa-lg transition-icon"></i>
+            </div>
+            
+            <div class="accordion-content open">
+                <div class="content-padding">
+                    <div class="team-grid">
+                        <div class="team-card">
+                            <i class="fas fa-user-graduate fa-3x" style="color:#dee2e6; margin-bottom:15px;"></i>
+                            <h4>Regina Elorza</h4>
+                            <span class="role-badge">Estudiante de Ingeniería Industrial</span>
+                        </div>
+                        <div class="team-card">
+                            <i class="fas fa-user-graduate fa-3x" style="color:#dee2e6; margin-bottom:15px;"></i>
+                            <h4>Jessica Anahí</h4>
+                            <span class="role-badge">Estudiante de Ingeniería Industrial</span>
+                        </div>
+                        <div class="team-card">
+                            <i class="fas fa-user-graduate fa-3x" style="color:#dee2e6; margin-bottom:15px;"></i>
+                            <h4>Regina Rocha González</h4>
+                            <span class="role-badge">Estudiante de Ingeniería Industrial</span>
+                        </div>
+                        <div class="team-card">
+                            <i class="fas fa-user-graduate fa-3x" style="color:#dee2e6; margin-bottom:15px;"></i>
+                            <h4>Emmanuel Juárez Del Río</h4>
+                            <span class="role-badge">Estudiante de Ingeniería Industrial</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer style="text-align: center; padding: 40px 0; color: #aaa; font-size: 0.9rem;">
+            <p>© 2025 NexTech Industries. Proyecto Académico de Física Dinámica.</p>
+            <p>León, Guanajuato, México</p>
+        </footer>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // --- 1. LÓGICA DEL MENÚ Y ACORDEÓN ---
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const icon = header.querySelector('.transition-icon');
+            
+            if (content.style.maxHeight || content.classList.contains('open')) {
+                content.style.maxHeight = null;
+                content.classList.remove('open');
+                icon.style.transform = "rotate(0deg)";
+            } else {
+                // Cerrar otros (Opcional, para efecto focus)
+                document.querySelectorAll('.accordion-content').forEach(c => {
+                    c.style.maxHeight = null;
+                    c.classList.remove('open');
+                });
+                document.querySelectorAll('.transition-icon').forEach(i => i.style.transform = "rotate(0deg)");
+
+                content.style.maxHeight = content.scrollHeight + "px";
+                content.classList.add('open');
+                icon.style.transform = "rotate(180deg)";
+            }
+        }
+
+        function goToSection(id) {
+            const section = document.getElementById(id);
+            const header = section.querySelector('.accordion-header');
+            
+            // Abrir si está cerrado
+            const content = section.querySelector('.accordion-content');
+            if (!content.classList.contains('open')) {
+                toggleAccordion(header);
+            }
+
+            // Scroll suave
+            setTimeout(() => {
+                section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100); // Pequeño delay para permitir que abra
+        }
+
+        // Inicializar alturas correctas al cargar
+        window.addEventListener('load', () => {
+            document.querySelectorAll('.accordion-content.open').forEach(c => {
+                c.style.maxHeight = c.scrollHeight + "px";
+                c.previousElementSibling.querySelector('.transition-icon').style.transform = "rotate(180deg)";
+            });
+        });
+
+
+        // --- 2. ANIMACIÓN 3D AVANZADA (SCROLLYTELLING) ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf8f9fa); // Coincidir con CSS
+        
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // Objeto Dinámico
+        const geometry = new THREE.IcosahedronGeometry(3, 1);
+        const material = new THREE.MeshBasicMaterial({ 
+            color: 0x2979ff, // Azul NexTech
+            wireframe: true,
+            transparent: true,
+            opacity: 0.15
+        });
+        const shape = new THREE.Mesh(geometry, material);
+        scene.add(shape);
+
+        // Núcleo sólido
+        const coreGeo = new THREE.OctahedronGeometry(1, 0);
+        const coreMat = new THREE.MeshBasicMaterial({ color: 0x0d1b2a, wireframe: true });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        shape.add(core);
+
+        camera.position.z = 8;
+
+        // Lógica de Animación con Scroll
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Rotación constante base
+            shape.rotation.y += 0.002;
+            shape.rotation.x += 0.001;
+            core.rotation.y -= 0.005; // Giro contrario
+
+            // Obtener Scroll %
+            const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+
+            // TRANSICIÓN DE FORMA SEGÚN SCROLL
+            // 1. Rotación acelerada al bajar
+            shape.rotation.z = scrollPercent * Math.PI * 2;
+
+            // 2. Acercamiento de cámara sutil
+            camera.position.z = 8 - (scrollPercent * 3);
+
+            // 3. Cambio de escala (simula "explosión" o análisis)
+            // Si estamos a la mitad (Sección Robótica), se expande
+            if(scrollPercent > 0.3 && scrollPercent < 0.7) {
+                shape.scale.setScalar(1 + (scrollPercent * 0.5));
+            } else {
+                // Lerp para volver a tamaño normal
+                shape.scale.lerp(new THREE.Vector3(1,1,1), 0.05);
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // Responsive
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>
